@@ -1,0 +1,120 @@
+{% extends "base_template.html" %}
+
+{% block section %}
+
+<div class="row">
+	<div class="span12">
+		{% if form.errors %}
+			<div class="alert alert-danger"><b>Username or password invalid. Please try again.</b></div>
+		{% endif %}
+		{% if request.GET.next %}
+			<div class="alert alert-warning"><b>Please log in or register.</b></div>
+		{% endif %}
+		{% if request.GET.resetMessage %}
+			<div class="alert alert-info"><b>An email containing instructions for resetting your password has been sent to the email specified.</b></div>
+		{% endif %}
+		{% if request.GET.resetSuccess %}
+			<div class="alert alert-success"><b>Your password has been reset. Please log in.</b></div>
+		{% endif %}
+	</div>
+
+	<div id="passForm">
+		<div class="span4">
+			<div class="loginHalf">
+				<h5 class="titleNoMargin">Log In</h5>
+				<br />
+				<form action="/accounts/login/" method="post">{% csrf_token %}
+					<table class="passChangeForm">
+						<tr>
+							<td><b>Username</b><br />
+							<input type="text" name="username" id="username" /></td>
+						</tr>
+						<tr>
+							<td><b>Password</b><br />
+							<input type="password" name="password" id="password" /></td>
+						</tr>
+						<tr>
+							<td><button type="submit" class="btn btn-primary btn-small" name="loginType" value="Log In">Log In</button></td>
+						</tr>
+					</table>
+				</form>
+				<a class="blogByline" href="/accounts/login/reset/">Forgot username/password</a>
+			</div>
+		</div>
+		
+		<div class="span8">
+			<h5 class="titleNoMargin">Register</h5>
+			<br />
+			<form action="/accounts/create/" method="post">{% csrf_token %}
+				<table class="passChangeForm">
+					<tr>
+						<td>
+							<b>Username</b><br />					
+							<input type="text" name="username" maxlength="30" value="{{ creationForm.username.value }}" />
+						</td>
+						<td>
+							{% if creationForm.username.errors %}
+								<div class="alert alert-danger">
+									{% for error in creationForm.username.errors %}
+										<b>{{ error }}</b><br />
+									{% endfor %}
+								</div>
+							{% endif %}
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<b>Email</b><br />
+							<input type="text" name="email" value="{{ creationForm.email.value }}" />
+						</td>
+						<td>
+							{% if creationForm.email.errors %}
+								<div class="alert alert-danger">
+									{% for error in creationForm.email.errors %}
+										<b>{{ error }}</b><br />
+									{% endfor %}
+								</div>
+							{% endif %}
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<b>Password</b><br />
+							<input type="password" name="password1" />
+						</td>
+						<td>
+							{% if creationForm.password1.errors %}
+								<div class="alert alert-danger">
+									{% for error in creationForm.password1.errors %}
+										<b>{{ error }}</b><br />
+									{% endfor %}
+								</div>
+							{% endif %}
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<b>Confirm Password</b><br />
+							<input type="password" name="password2" />
+						</td>
+						<td>
+							{% if creationForm.password2.errors %}
+								<div class="alert alert-danger">
+									{% for error in creationForm.password2.errors %}
+										<b>{{ error }}</b><br />
+									{% endfor %}
+								</div>
+							{% endif %}
+						</td>
+					</tr>
+					<tr>
+						<td colspan=2><button type="submit" name="register" class="btn btn-primary btn-small" value="Register">Register</button></td>
+					</tr>
+				</table>
+			</form>
+		</div>
+	</div>
+
+</div>
+
+{% endblock %}

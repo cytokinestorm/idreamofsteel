@@ -1,0 +1,28 @@
+{% extends "base_template.html" %}
+
+{% block section %}
+
+<div class="sidebar4Background">
+    <div class="row">
+        <div class = "span8">
+            <div class="blogMainTitle"><h5>{% block blogSubtitle %}Latest Posts{% endblock %}</h5></div>
+            
+            {% block blogPagerTop %}{% include "blog/allview_pager.html" with pagedSession=pagedSession lastpage=lastpage %}{% endblock %}
+            
+            {% for iSession in pagedSessionDict %}
+                <h5 class="titleTopMargin"><b><a href='{% url share.views.blogSession iSession.id %}'>{{ iSession.title }}</a></b></h5>
+                {% include "blog/session_printbody.html" with iSession=iSession %}
+                <p class="blogByline">Posted on {{ iSession.create_time }} <a href='{% url share.views.blogSession iSession.id %}#comments'>{{ iSession.comment_count }} {% if iSession.comment_count = 1 %}Comment{% else %}Comments{% endif %}</a></p>
+                <br />
+            {% endfor %}
+
+            {% block blogPagerBot %}{% include "blog/allview_pager.html" with pagedSession=pagedSession lastpage=lastpage %}{% endblock %}
+        </div>
+
+        <div class = "span4">
+            {% block blogSidebar %}{% endblock %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

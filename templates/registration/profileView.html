@@ -1,0 +1,22 @@
+{% extends "base_template.html" %}
+
+{% block section %}
+
+<div class="row">
+    <div class="span4">
+        <div class="profileHeader">
+            <h5><b>{{ thisProfile.user.username }}'s Profile</b></h5>
+            <span class="profileControls"><a href={% url share.views.blogUser username=thisProfile.user.username page=1 %} class="tooltip-left" title="{{ thisProfile.user.username }}'s Log"><i class="icon-book icon-large"></i></a></span>
+        </div>
+
+        {% include "registration/profileViewTable.html" %}
+    </div>
+    
+    {% include "registration/profileChart.html" %}
+</div>
+
+{% endblock %}
+
+{% block scriptStuff %}
+    {% include "registration/chartProportional.html" %}
+{% endblock %}

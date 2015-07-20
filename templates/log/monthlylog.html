@@ -1,0 +1,53 @@
+{% extends "log/log_template.html" %}
+
+{% block log %}
+<table class='monthlyTitle'><tbody><tr>
+	<td><a href='{{ calNav.prevYear }}'><button class="btn"><i class="icon-backward icon-large"></button></i></a></td>
+	<td><a href='{{ calNav.prevMonth }}'><button class="btn"><i class="icon-caret-left icon-large"></i></button></a></td>
+	<td class="monthName"><h4>{{ calTitle }}</h4></td>
+	<td><a href='{{ calNav.nextMonth }}'><button class="btn"><i class="icon-caret-right icon-large"></i></button></a></td>
+	<td><a href='{{ calNav.nextYear }}'><button class="btn"><i class="icon-forward icon-large"></i></button></a></td>
+</tr></tbody></table>
+
+<table class="monthlycal">
+	<thead>
+		<tr>
+			<th>Sunday</th>
+			<th>Monday</th>
+			<th>Tuesday</th>
+			<th>Wednesday</th>
+			<th>Thursday</th>
+			<th>Friday</th>
+			<th>Saturday</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for iDay in monthArray %}
+			{% if iDay.weekday == 0 %}<tr>{% endif %}
+				<td>
+					{% if iDay.monthday != 0 %}
+						<p class="calnum">{{ iDay.monthday }}</p>
+						<table class="dailylist">
+							{% if iDay.sessionLink %}
+								{% for iSession in iDay.sessionLink %}
+									<tr>
+										{% if iSession.status == 1 %}
+											<td class="dailysession"><a href='{{ iSession.link }}'><span class="label label-success">{{ iSession.title }}</span></a></td>
+										{% elif iSession.status == 2 %}
+											<td class="dailysession"><a href='{{ iSession.link }}'><span class="label label-warning">{{ iSession.title }}</span></a></td>
+										{% endif %}
+										<td class="dailydel"><a href='{{ iSession.delink }}'><span class="label label-important">X</span></a></td>
+									</tr>
+								{% endfor %}
+							{% endif %}
+							<tr>
+								<td><a href='{{ iDay.addlink }}'><span class="label label-info">+</span></a></td>
+							</tr>
+						</table>
+					{% endif %}
+				</td>
+			{% if iDay.weekday == 6 %}</tr>{% endif %}
+		{% endfor %}
+	</tbody>
+</table>
+{% endblock %}

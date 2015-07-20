@@ -1,0 +1,58 @@
+{% load htmlFilters %}
+{% load unitFilters %}
+
+<p class="blogWho">
+<b><a href={% url userstats.views.viewProfile username=iSession.author__username %}>{{ iSession.author__username }}</a>, {{ iSession.session_date }}</b>
+{% if iSession.author_id = request.user.id %}
+&nbsp;<a href={% url traininglog.views.updateSession sessionid=iSession.id %}><i class="icon-edit"></i></a>
+{% endif %}
+</p>
+{% autoescape off %}
+    {% if iSession.content %}
+        <div class="breakWord">
+            {{ iSession.content|linebreaks|postFilter }}
+        </div>
+    {% else %}
+        <p></p>
+    {% endif %}
+{% endautoescape %}
+{% if iSession.strength_set %}
+    <table class="table table-log table-condensed">
+        <tbody>
+            {% for iStrength in iSession.strength_set %}
+            <tr class="
+            {% if iStrength.mo %}alert alert-success{% endif %}
+            {% if iStrength.reps = 0 or iStrength.sets = 0 %}failedLift{% endif %}
+            ">
+                <td>
+                    <div class="blogLift">
+                        {% if iStrength.lift__name != "Other" %}
+                            <a href={% url charts.views.tracker username=iSession.author__username liftId=iStrength.lift_id %}>{{ iStrength.lift__name }}</a>
+                        {% else %}
+                            {{ iStrength.lift__name }}
+                        {% endif %}
+                    </div>
+                    <div class="blogInt">
+                        {{ iStrength.sets }} sets
+                    </div>
+                    <div class="blogX">x</div>
+                    <div class="blogInt">
+                    {{ iStrength.reps }} reps
+                    </div>
+                    <div class="blogX">x</div>
+                    <div class="blogWeight">
+                        {% if blogUnit = 'kg' %}
+                            {{ iStrength.weight|toKgs|floatformat }} kg
+                        {% else %}
+                            {{ iStrength.weight|floatformat }} lb
+                        {% endif %}
+                    </div>
+                    <div class="blogComments">
+                        {{ iStrength.comments }}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endif %}

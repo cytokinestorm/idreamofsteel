@@ -1,0 +1,20 @@
+<table class="table table-condensed importTable">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>View Session</th>
+            <th>Edit Session</th>
+            <th>View Month</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for iSession in sessionList %}
+        <tr>
+            <td>{{ iSession.session_date }}</td>
+            <td><a href={% url share.views.blogSession sessionid=iSession.id %}>View Session</a></td>
+            <td><a href={% url traininglog.views.updateSession sessionid=iSession.id %}>Edit Session</a></td>
+            <td><a href={% url traininglog.views.logMonthly year=iSession.session_date.year month=iSession.fancyMonth %}>View Month</a></td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

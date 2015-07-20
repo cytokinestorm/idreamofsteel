@@ -1,0 +1,21 @@
+{% extends "base_template.html" %}
+
+{% block section %}
+
+<h5 class="titleNoMargin">Import Training Log</h5>
+
+<p>Instructions will be written at a future date, but basically, match the format of an exported log, and make sure it's a CSV.
+Importing is a bit finicky at the moment, so if you run into problems uploading your file and can't figure out what's wrong, please <a href="mailto:admin@idreamofsteel.com">send us an email</a> with the file attached.</p>
+
+<form action={% url traininglog.views.importLogSubmit %} method="post" enctype="multipart/form-data">{% csrf_token %}
+<table>{{ importForm }}</table>
+<br />
+<button type="submit" class="btn btn-primary">Submit</button>
+</form>
+
+{% if importedSessions %}
+    <p><b>Previously Imported Sessions</b></p>
+    {% with sessionList=importedSessions %}{% include "log/importLogList.html" %}{% endwith %}
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "base_template.html" %}
+
+{% block section %}
+
+<h5 class="titleNoMargin">Import Training Log, Results</h5>
+
+{% if newSessionList %}
+    <p><b>Successfully Imported Sessions</b></p>
+    {% with sessionList=newSessionList %}{% include "log/importLogList.html" %}{% endwith %}
+{% endif %}
+
+{% if failedLog %}
+    <p><b>Failed Log Entries</b></p>
+    <div class="code">
+    {% for iRow in failedLog %}
+        {% for iEntry in iRow %}
+            {{ iEntry }}{% if not forloop.last %},{% endif %}
+        {% endfor %}
+        <br />
+    {% endfor %}
+    </div>
+{% endif %}
+
+{% endblock %}

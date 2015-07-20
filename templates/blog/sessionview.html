@@ -1,0 +1,67 @@
+{% extends "base_template.html" %}
+
+{% block sectionTitle %}
+    <div class="blogOwnerInfo">
+        <table><tr><td>
+            <h1><a href={% url share.views.blogUser username=iSessionDict.author__username page=1 %}>{{ iSessionDict.author__username }}</a></h1>
+            <h5><a href='/share/feed/rss/user/{{ iSessionDict.author__username }}/'><i class="icon-rss"></i></a></h5>
+        </td></tr></table>
+    </div>
+{% endblock %}
+
+{% block section %}
+
+<div class="sidebar4Background">
+    <div class="row">
+        <div class="span8">
+            <h5 class="titleNoMargin"><b>{{ thisSession.title }}</b></h5>
+            {% include "blog/session_printbody.html" with iSession=iSessionDict %}
+            <p class="blogByline">Posted on {{ thisSession.create_time }}</p>
+            
+            <a name="comments"></a>
+            <h5 class="titleTopMargin">Comments</h5>
+            {% if nComment == 0 %}
+                <div class="comment_box commentboxlight">
+                    <i>No Comments</i>
+                </div>
+            {% else %}
+                {% for iComment in commentList %}
+                    <a name="c{{ iComment.id }}"></a>
+                    <div class="comment_box {% if iComment.author_id = thisSession.author_id %}commentboxdark{% else %}commentboxlight{% endif %}">
+                        <span class="float_l"><b><a href={% url userstats.views.viewProfile username=iComment.author__username %}>{{ iComment.author__username }}</a></b> on {{ iComment.create_time }}</span>
+                        {% if iComment.author_id == request.user.id and iComment.status == 1 %}
+                            <span class="float_r"><a href={% url share.views.commentDelete commentid=iComment.id %}><i class="icon-trash"></i></a></span>
+                        {% endif %}
+                        <br />
+                        {% if iComment.status == 1 %}
+                            <div class="breakWord">
+                                {{ iComment.content|linebreaks }}
+                            </div>
+                        {% else %}
+                            <p><i>This comment has been deleted.</i></p>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% endif %}
+            
+            <a name="postComment"></a>
+            <h5 class="titleTopMargin">Post a Comment</h5>
+            {% if request.user.is_authenticated %}
+                <form action={% url share.views.commentSubmit sessionid=thisSession.id %} method="post">{% csrf_token %}
+                    <p class="commentEntry">{{ commentForm.content }}</p>
+                    <p style="display: none;">{{ commentForm.honeypot }}</p> <!-- Is this even necessary with required accounts? -->
+                    <p><button type="submit" name="submitType" class="btn btn-primary btn-small" value="Post Comment">Post Comment</button></p>
+                </form>
+            {% else %}
+                <p>Please <a href={% url userstats.views.idosLogin %}>log in</a> to comment.</p>
+            {% endif %}
+        </div>
+
+        <div class = "span4 blogSideBar">
+            {% include "blog/sidebar_profileTable.html" %}
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

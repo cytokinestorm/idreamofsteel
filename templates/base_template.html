@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>I Dream of Steel</title>
+        <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}css/idreamofsteel.css?{{ REVISION }}" />
+    </head>
+    
+    <body>
+        <div class="idos-header">
+            <div class="container"><div class="row"><div class="span12">
+                <table class="idos-headerTable"><tbody><tr>
+                    <td class="idos-titleCell">
+                        <a href="/" class="idos-siteTitle"><div class="idos-siteTitle">
+                            <h3><span></span>I DREAM OF STEEL</h3>
+                        </div></a>
+                    </td>
+                    <td class="idos-navCell">
+                        {% if request.user.is_authenticated %}
+                            <a href={% url userstats.views.editProfile %}><button class="tooltip-bottom btn btn-inverse idos-homeButton" title="Home"><i class="icon-home icon-large"></i></button></a>
+                            <a href={% url traininglog.views.logMonthly %}><button class="tooltip-bottom btn btn-inverse" title="Calendar"><i class="icon-calendar icon-large"></i></button></a>
+                            <a href={% url traininglog.views.logDefault %}><button class="tooltip-bottom btn btn-inverse" title="Log"><i class="icon-edit icon-large"></i></button></a>
+                            <a href={% url charts.views.leaderboard sex='men' lift='total' %}><button class="tooltip-bottom btn btn-inverse" title="Leaderboard"><i class="icon-picture icon-large"></i></button></a>
+                            <a href={% url share.views.blogAll page=1 %}><button class="tooltip-bottom btn btn-inverse" title="Share"><i class="icon-list icon-large"></i></button></a>
+                            {% if request.user.is_staff %}<a href='/admin/'><button class="tooltip-bottom btn btn-inverse" title="Admin">A</button></a>{% endif %}
+                            <form action={% url django.contrib.auth.views.logout %} method="post">{% csrf_token %}
+                                <button type="submit" class="tooltip-bottom btn btn-inverse idos-leaveButton" title="Log Out"><i class="icon-signout icon-large"></i></button>
+                                <input type="hidden" name="next" value="/" />
+                            </form>
+                        {% else %}                    
+                            <a href="/"><button class="tooltip-bottom btn btn-inverse idos-homeButton" title="Home"><i class="icon-home icon-large"></i></button></a>
+                            <form action={% url userstats.views.idosLogin %} method="post">{% csrf_token %}
+                                <input type="text" name="username" id="username" placeholder="Username" class="idos-headerInput"/>
+                                <input type="password" name="password" id="password" placeholder="Password" class="idos-headerInput"/>
+                                <input type="submit" class="btn btn-inverse" name="loginType" value="Log In" />
+                                <input type="submit" class="btn btn-inverse idos-leaveButton" name="loginType" value="Register" />
+                            </form>
+                        {% endif %}
+                    </td>
+                </tr></tbody></table>
+            </div></div></div>
+        </div>
+            
+        <div class="idos-mainContent">
+            <div class="container"><div class="row"><div class="span12">
+                <div class="idos-sectionTitle">
+                    {% block sectionTitle %}{% endblock %}
+                </div>
+            </div></div></div>
+            <div class="container">
+                {% block section %}
+                {% endblock %}
+            </div>
+        </div>
+        
+            
+        <div class="idos-footer">
+            <div class="container"><div class="row"><div class="span12">
+                <span class="float_l">&copy 2012, I Dream of Steel</span>
+                <span class="float_r">
+                    <a href={% url share.views.blogUser username='admin' page=1 %}>About</a>
+                    <span class="idos-frameText"> | </span>
+                    <a href="mailto:admin@idreamofsteel.com">Contact</a>
+                </span>
+            </div></div></div>
+        </div>
+
+        <script type="text/javascript" src="{{ STATIC_URL }}js/idreamofsteel.min.js?{{ REVISION }}"></script>
+        {% if debug %}
+            Foo
+        {% endif %}
+        <script type="text/javascript">
+            $(function() {$('.tooltip-top').tooltip({html: true, placement: 'top'});});
+            $(function() {$('.tooltip-bottom').tooltip({html: true, placement: 'bottom'});});
+            $(function() {$('.tooltip-left').tooltip({html: true, placement: 'left'});});
+        </script>
+        <!-- Google Analytics -->
+        <script type="text/javascript">
+          var _gaq = _gaq || [];
+          _gaq.push(['_setAccount', 'UA-37182039-1']);
+          _gaq.push(['_trackPageview']);
+
+          (function() {
+            var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+            ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+            var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+          })();
+        </script>
+        {% block scriptStuff %}{% endblock %}
+    </body>
+</html>

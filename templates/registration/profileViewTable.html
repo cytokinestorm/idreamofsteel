@@ -1,0 +1,107 @@
+<table class="table table-profileView table-bordered">
+    <thead>
+        <tr>
+            <th>First Name</th>
+            <th>Last Name</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>{{ thisProfile.user.first_name }}</td>
+            <td>{{ thisProfile.user.last_name }}</td>
+        </tr>
+    </tbody>
+
+    <thead>
+        <tr>
+            <th>Sex</th>
+            <th>Weight</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>{{ thisProfile.get_prettysex }}</td>
+            <td>{% if thisProfile.weight %}{{ thisProfile.weight|floatformat }} {{ unit }}{% endif %}</td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="tabbable">
+    <ul class="nav nav-tabs noMargin">
+        <li class="active"><a href="#powerlifting" data-toggle="tab"><b>Powerlifting</b></a></li>
+        <li><a href="#olympiclifting" data-toggle="tab"><b>Olympic Lifting</b></a></li>
+    </ul>
+
+    <div class="tab-content upshift">
+        <div class="tab-pane active" id="powerlifting">
+            <table class="table table-profileView table-bordered">
+                <tbody>
+                    <tr>
+                        <th class="pLiftName">Wt. Class</th>
+                        <td colspan=2>{% if thisProfile.pl_weightclass %}{{ thisProfile.get_prettyPlClass }}{% endif %}</td>
+                    </tr>
+                    <tr>
+                        <th class="pLiftName"></th>
+                        <th>Gym</th>
+                        <th>Meet</th>
+                    </tr>
+                    <tr>
+                        <th class="pLiftName"><a href={% url charts.views.tracker username=thisProfile.user.username liftId=9 %}>Squat</a></th>
+                        <td>{% if thisProfile.squat_gym %}{{ thisProfile.squat_gym|floatformat }} {{ unit }}{% endif %}</td>
+                        <td>{% if thisProfile.squat_meet %}{{ thisProfile.squat_meet|floatformat }} {{ unit }}{% endif %}</td>
+                    </tr>
+                    <tr>
+                        <th class="pLiftName"><a href={% url charts.views.tracker username=thisProfile.user.username liftId=12 %}>Bench</a></th>
+                        <td>{% if thisProfile.bench_gym %}{{ thisProfile.bench_gym|floatformat }} {{ unit }}{% endif %}</td>
+                        <td>{% if thisProfile.bench_meet %}{{ thisProfile.bench_meet|floatformat }} {{ unit }}{% endif %}</td>
+                    </tr>
+                    <tr>
+                        <th class="pLiftName"><a href={% url charts.views.tracker username=thisProfile.user.username liftId=15 %}>Deadlift</a></th>
+                        <td>{% if thisProfile.dead_gym %}{{ thisProfile.dead_gym|floatformat }} {{ unit }}{% endif %}</td>
+                        <td>{% if thisProfile.dead_meet %}{{ thisProfile.dead_meet|floatformat }} {{ unit }}{% endif %}</td>
+                    </tr>
+                    <tr>
+                        <th class="pLiftName">PL Total</th>
+                        <td>{% if thisProfile.total_gym %}{{ thisProfile.total_gym|floatformat }} {{ unit }}{% endif %}</td>
+                        <td>{% if thisProfile.total_meet %}{{ thisProfile.total_meet|floatformat }} {{ unit }}{% endif %}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="tab-pane" id="olympiclifting">
+            <table class="table table-profileView table-bordered">
+                <tbody>
+                    <tr>
+                        <th class="pLiftName">Wt. Class</th>
+                        <td colspan=2>{% if thisProfile.oly_weightclass %}{{ thisProfile.get_prettyOlyClass }}{% endif %}</td>
+                    </tr>
+                    <tr>
+                        <th class="pLiftName"></th>
+                        <th>Gym</th>
+                        <th>Meet</th>
+                    </tr>
+                    <tr>
+                        <th class="pLiftName"><a href={% url charts.views.tracker username=thisProfile.user.username liftId=44 %}>Snatch</a></th>
+                        <td>{% if thisProfile.snatch_gym %}{{ thisProfile.snatch_gym|floatformat }} {{ unit }}{% endif %}</td>
+                        <td>{% if thisProfile.snatch_meet %}{{ thisProfile.snatch_meet|floatformat }} {{ unit }}{% endif %}</td>
+                    </tr>
+                    <tr>
+                        <th class="pLiftName"><a href={% url charts.views.tracker username=thisProfile.user.username liftId=43 %}>Clean & Jerk</a></th>
+                        <td>{% if thisProfile.cnj_gym %}{{ thisProfile.cnj_gym|floatformat }} {{ unit }}{% endif %}</td>
+                        <td>{% if thisProfile.cnj_meet %}{{ thisProfile.cnj_meet|floatformat }} {{ unit }}{% endif %}</td>
+                    </tr>
+                    <tr>
+                        <th class="pLiftName">Oly Total</th>
+                        <td>{% if thisProfile.olytotal_gym %}{{ thisProfile.olytotal_gym|floatformat }} {{ unit }}{% endif %}</td>
+                        <td>{% if thisProfile.olytotal_meet %}{{ thisProfile.olytotal_meet|floatformat }} {{ unit }}{% endif %}</td>
+                    </tr>
+                    <tr class="notImportant">
+                        <th class="pLiftName"><a href={% url charts.views.tracker username=thisProfile.user.username liftId=18 %}>Press</a></th>
+                        <td>{% if thisProfile.press_gym %}{{ thisProfile.press_gym|floatformat }} {{ unit }}{% endif %}</td>
+                        <td>{% if thisProfile.press_meet %}{{ thisProfile.press_meet|floatformat }} {{ unit }}{% endif %}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

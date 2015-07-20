@@ -1,0 +1,11 @@
+<table class="blogPager"><tbody><tr><td>
+    {% if pagedSession.has_previous %}
+        <a href='{{ pagerPath }}/1/'><button class="btn btn-mini float_l"><i class="icon-step-backward"></i> Oldest</button></a>
+        <a href='{{ pagerPath }}/{{ pagedSession.previous_page_number }}/'><button class="btn btn-mini float_l pagerSpacer"><i class="icon-caret-left"></i> Older</button></a>
+    {% endif %}
+
+    {% if pagedSession.has_next %}
+        <a href='{{ pagerPath }}/{{ lastpage }}/'><button class="btn btn-mini float_r pagerSpacer">Newest <i class="icon-step-forward"></i></button></a>
+        <a href='{{ pagerPath }}/{{ pagedSession.next_page_number }}/'><button class="btn btn-mini float_r">Newer <i class="icon-caret-right"></i></button></a>
+    {% endif %}
+</td></tr></tbody></table>

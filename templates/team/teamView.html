@@ -1,0 +1,175 @@
+{% extends "team/team_template.html" %}
+
+{% block sectionTitle %}
+    <div class="blogOwnerInfo">
+        <table><tr>
+            <td class="sectionTeamTitle">
+                <h1><a href={% url share.views.blogTeam teamname=thisTeam.name page=1 %}>{{ thisTeam.pretty_name }}</a></h1>
+                <h5><a href='/share/feed/rss/team/{{ thisTeam.name }}/'><i class="icon-rss"></i></a></h5>
+            </td>
+            <td class="sectionTeamTitle">
+                {{ thisTeam.description }}
+            </td>
+        </tr></table>
+    </div>
+{% endblock %}
+
+{% block team %}
+        
+<div class="row"><div class="span12">
+    <form action="/share/team/edit/{{ thisTeam.name }}/"><button type="submit" class="btn">Edit Name and Description</button></form>
+    <div class="row">
+        <div class="span6">
+            <h5 class="titleTopMargin">Captains</h5>
+            <table class="table table-condensed teamMemberList">
+                {% if captainList %}
+                    {% include "team/team_memberHead.html" %}
+                    <tbody>
+                        {% for iMember in captainList %}
+                            <tr>
+                                <td class="teamMemberCell"><a href="/accounts/profile/view/{{ iMember.username }}/">{{ iMember.username }}</a></td>
+                                <td class="teamPromoteCell"></td>
+                                <td class="teamDemoteCell">
+                                    {% if request.user != iMember %}
+                                        <form action="/share/team/manage/{{ thisTeam.name }}/demote/{{ iMember.username }}/"><button type="submit" class="btn btn-mini btn-danger">Demote</button></form>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                {% else %}
+                    <tr>
+                        <td class="teamMemberCell"><i>No Captains</i></td>
+                    </tr>
+                {% endif %}
+            </table>
+
+            <h5 class="titleTopMargin">Members</h5>
+            <table class="table table-condensed teamMemberList">
+                {% if memberList %}
+                    {% include "team/team_memberHead.html" %}
+                    <tbody>
+                        {% for iMember in memberList %}
+                            <tr>
+                                <td class="teamMemberCell"><a href="/accounts/profile/view/{{ iMember.username }}/">{{ iMember.username }}</a></td>
+                                <td class="teamPromoteCell">
+                                    <form action="/share/team/manage/{{ thisTeam.name }}/promote/{{ iMember.username }}/"><button type="submit" class="btn btn-mini">Promote</button></form>
+                                </td>
+                                <td class="teamDemoteCell">
+                                    <form action="/share/team/manage/{{ thisTeam.name }}/demote/{{ iMember.username }}/"><button type="submit" class="btn btn-mini btn-danger">Demote</button></form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                {% else %}
+                    <tr>
+                        <td class="teamMemberCell"><i>No Members</i></td>
+                    </tr>
+                {% endif %}
+            </table>
+            
+            <h5 class="titleTopMargin">Wannabes</h5>
+            <table class="table table-condensed teamMemberList">
+                {% if wannabeList %}
+                    {% include "team/team_memberHead.html" %}
+                    <tbody>
+                        {% for iMember in wannabeList %}
+                            <tr>
+                                <td class="teamMemberCell"><a href="/accounts/profile/view/{{ iMember.username }}/">{{ iMember.username }}</a></td>
+                                <td class="teamPromoteCell">
+                                    <form action="/share/team/manage/{{ thisTeam.name }}/promote/{{ iMember.username }}/"><button type="submit" class="btn btn-mini">Accept</button></form>
+                                </td>
+                                <td class="teamDemoteCell">
+                                    <form action="/share/team/manage/{{ thisTeam.name }}/demote/{{ iMember.username }}/"><button type="submit" class="btn btn-mini btn-danger">Deny</button></form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                {% else %}
+                    <tr>
+                        <td class="teamMemberCell"><i>No Wannabes</i></td>
+                    </tr>
+                {% endif %}
+            </table>
+        </div>
+    
+        <div class="span6">
+            {% if invitedList or invitedEmailNew %}
+                <h5 class="titleTopMargin">Invitations</h5>
+            {% endif %}
+            
+            {% if invitedEmailNew %}
+                <div class="newInviteTitle">Email Invites</div>
+                <table class="table table-condensed teamMemberList">
+                {% for iMember in invitedEmailNew %}
+                    <tr>
+                        <td class="teamMemberCell">{{ iMember }}</td>
+                        <td class="teamPromoteCell"></td>
+                        <td class="teamDemoteCell">
+                            <form action="/share/team/uninvite/{{ thisTeam.name }}/" method="post">{% csrf_token %}
+                            <input type="hidden" name="email" value="{{ iMember }}" />
+                            <button type="submit" name="uninviteType" value="new" class="btn btn-mini btn-danger">Uninvite</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </table>
+            {% endif %}
+            
+            {% if invitedList %}
+                <div class="newInviteTitle">Existing IDoS Members</div>
+                <table class="table table-condensed teamMemberList">
+                {% include "team/team_memberHead.html" %}
+                <tbody>
+                    {% for iMember in invitedList %}
+                        <tr>
+                            <td class="teamMemberCell"><a href="/accounts/profile/view/{{ iMember.username }}/">{{ iMember.username }}</a></td>
+                            <td class="teamPromoteCell"></td>
+                            <td class="teamDemoteCell">
+                                <form action="/share/team/uninvite/{{ thisTeam.name }}/" method="post">{% csrf_token %}
+                                <input type="hidden" name="username" value="{{ iMember.username }}" />
+                                <button type="submit" name="uninviteType" value="existing" class="btn btn-mini btn-danger">Uninvite</button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+                </table>
+            {% endif %}
+            
+            <h5 class="titleTopMargin">Invite New Members</h5>
+            <div class="newInviteTitle">By Email</div>
+            <div class="blogByline">Enter the emails of all the people you would like to invite, separated by commas.</div>
+            <form action="/share/team/invite/{{ thisTeam.name }}/" method="post">{% csrf_token %}
+                <div class="emailInviteBox"><textarea name="emailList"></textarea></div>
+                <button type="submit" name="inviteType" value="new" class="btn btn-mini btn-success">Invite</button>
+            </form>
+            
+            {% if loserList %}
+                <br /><a href="#existingMembers" data-toggle="collapse"><span class="newInviteTitle">By Existing Member List</span> (click to expand)</a>
+                <div id="existingMembers" class="collapse">
+                    <table class="table table-condensed teamMemberList">
+                    {% include "team/team_memberHead.html" %}
+                        <tbody>
+                            {% for iMember in loserList %}
+                                <tr>
+                                    <td class="teamMemberCell"><a href="/accounts/profile/view/{{ iMember.username }}/">{{ iMember.username }}</a></td>
+                                    <td class="teamPromoteCell">
+                                        <form action="/share/team/invite/{{ thisTeam.name }}/" method="post">{% csrf_token %}
+                                        <input type="hidden" name="username" value="{{ iMember.username }}" />
+                                        <button type="submit" name="inviteType" value="existing" class="btn btn-mini btn-success">Invite</button>
+                                        </form>
+                                    </td>
+                                    <td class="teamDemoteCell"></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+</div></div>
+
+{% endblock %}

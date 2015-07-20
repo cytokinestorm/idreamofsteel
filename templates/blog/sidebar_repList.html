@@ -1,0 +1,37 @@
+<div class="sidebarSection">
+    <div class="row">
+        <div class="span4">
+            <div class="sidebarHeader">
+                <h5>Rep Ranges</h5>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="span4">
+            <table class="sidebarListTable"><tbody>
+                {% for iRow in repRanges %}
+                    <tr>
+                    {% for iReps in iRow %}
+                        <td>
+                            <a href={% url share.views.blogReps username=thisUser.username liftid=liftid reps=iReps page=1 %}><i class="icon-play"></i>&nbsp;
+                                {% if iReps == 0 %}
+                                    Failed lifts
+                                {% elif iReps == 1 %}
+                                    Singles
+                                {% elif iReps == 2 %}
+                                    Doubles
+                                {% elif iReps == 3 %}
+                                    Triples
+                                {% else %}
+                                    {{ iReps }} reps
+                                {% endif %}
+                            </a>
+                        </td>
+                    {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody></table>
+        </div>
+    </div>
+</div>

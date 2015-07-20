@@ -1,0 +1,203 @@
+{% extends "log/log_template.html" %}
+
+{% block log %}
+
+{% load htmlFilters %}
+{% load unitFilters %}
+
+<form action={% url traininglog.views.submitSession %} method="post">{% csrf_token %}
+    <input type="hidden" name="sessionid" value={{ sessionid }} />
+    <input type="hidden" name="currentMonth" value="{{ currentMonth }}" />
+    <div class="container"><div class="row"><div class="sessionForm">
+        <div class="span5">
+            {% with thisField=thisForm.session.session_date %}{% include "registration/profileField.html" %}{% endwith %}
+            <button type="button" class="btn btn-success logAddLift" onclick="addMore('#str-0', 'tr.strength:last', 'strength', '')">Add Another Lift</button>
+            <div class="logManageLifts"><a href={% url traininglog.views.liftManager %}>Manage Lifts</a></div>
+            <div class="logTable">
+                <table class="table table-condensed">
+                    <thead>
+                        <tr>
+                            <th class="logTablePR">PR</th>
+                            <th class="logTableMain">
+                                <div class="logLift">Lift</div>
+                                <div class="logInt">Sets</div>
+                                <div class="logInt">Reps</div>
+                                <div class="logWeight">Weight</div>
+                            </th>
+                            <th class="logTableDel"></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {{ thisForm.strength.management_form }}
+                        {% for tStr in thisForm.strength %}
+                            <tr class='strength' id='str-{{ forloop.counter0 }}'>
+                                {{ tStr.id }}
+                                <td class="logTablePR">{% with thisField=tStr.mo %}{% include "registration/profileField.html" %}{% endwith %}</td>
+                                <td class="logTableMain">
+                                    <div class="logRow">
+                                        <div class="logLift">{% with thisField=tStr.lift %}{% include "registration/profileField.html" %}{% endwith %}</div>
+                                        <div class="logInt">{% with thisField=tStr.sets %}{% include "registration/profileField.html" %}{% endwith %}</div>
+                                        <div class="logInt">{% with thisField=tStr.reps %}{% include "registration/profileField.html" %}{% endwith %}</div>
+                                        <div class="logWeight">
+                                            {% if tStr.weight.errors %}
+                                                <div class="alert alert-danger profile-alert">
+                                                    {% for error in tStr.weight.errors %}
+                                                        {{ error }}<br />
+                                                    {% endfor %}
+                                                </div>
+                                            {% endif %}
+                                            {% if request.user.profile.units = 1 %}
+                                                {{ tStr.weight|toKgsForm|safe }} kg
+                                            {% else %}
+                                                {{ tStr.weight }} lb
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                    <div class="logRow">
+                                        <div class="logComment">{% with thisField=tStr.comments %}{% include "registration/profileField.html" %}{% endwith %}</div>
+                                    </div>
+                                </td>
+                                <td class="logTableDel">
+                                    <span class="hidden">{{ tStr.DELETE }}</span><button type="button" class="btn btn-mini btn-danger" onclick="deleteMe('#str-{{ forloop.counter0 }}')">-</button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <div class="span7">
+            {% with thisField=thisForm.session.title %}{% include "registration/profileField.html" %}{% endwith %}
+            {% with thisField=thisForm.session.content %}{% include "registration/profileField.html" %}{% endwith %}
+            <a href="#formatHelper" data-toggle="collapse" class="blogByline">FormatHelper</a>
+            <div id="formatHelper" class="collapse">
+                {% include "log/formatHelper.html" %}
+            </div>
+        </div>
+    </div></div></div>
+
+    <div class="container"><div class="row"><div class="span12">
+        {% if flipStatus %}
+            <button type="submit" name="submitType" class="btn btn-success btn-small float_l">Confirm Session</button>
+        {% else %}
+            <button type="submit" name="submitType" class="btn btn-primary btn-small float_l">Save</button>
+        {% endif %}
+    </div></div></div>
+</form>
+
+{% endblock %}
+
+{% block scriptStuff %}
+<script type="text/javascript">
+    function addMore(selector, addAfter, type, entry) {
+        var newElement = $(selector).clone(true);
+        var total = $('#id_' + type + '-TOTAL_FORMS').val();
+        
+        var liftList = {{ liftList|safe }};
+        
+        newElement.attr({'id': newElement.attr('id').replace(RegExp('-[0-9]*'), '-'+total)});
+        
+        // Make sure the button clones the right row!
+        newElement.find('button').each(function() {
+            $(this).attr({'onclick': $(this).attr('onclick').replace(RegExp("-[0-9]*'"), "-"+total+"'").replace(RegExp("'[0-9]*'"), "'"+total+"'")});
+        });
+        
+        // Handle all other input fields
+        newElement.find('input').each(function() {
+            var name = $(this).attr('name').replace(RegExp('-[0-9]*-'),'-'+total+'-');
+            var id = 'id_' + name;
+            $(this).attr({'name': name, 'id': id});
+            $(this).val('').removeAttr('checked');
+            if ($(this).attr('type') == "checkbox") {
+                $(this).removeAttr('value');
+            };
+            if ($(this).attr('class') == 'liftInput') {
+                $(this).off();
+                $(this).data('typeahead', (data = null));
+                $(this).typeahead({source: liftList});
+            };
+        });
+        // Text Areas
+        newElement.find('textarea').each(function() {
+            var name = $(this).attr('name').replace(RegExp('-[0-9]*-'),'-'+total+'-');
+            var id = 'id_' + name;
+            $(this).attr({'name': name, 'id': id});
+            $(this).val('');
+        });
+        newElement.show();
+        
+        total++;
+        $('#id_' + type + '-TOTAL_FORMS').val(total);
+        $(addAfter).after(newElement);
+    };
+
+    function deleteMe(selector) {
+        $(selector).find('input').each(function() {
+            if ($(this).attr('name').indexOf('-id') == -1) {
+                $(this).val('');
+                $(this).removeAttr('checked');
+                if ($(this).attr('name').indexOf('DELETE') >= 0) {
+                    $(this).attr('checked', 'checked');
+                    $(this).attr('value', 'on');
+                };
+            };
+        });
+        $(selector).find('textarea').each(function() {
+            if ($(this).attr('name').indexOf('-id') == -1) {
+                $(this).val('');
+            };
+        });
+        $(selector).hide();
+    };
+
+    $(function() {
+        $('#id_session-session_date').datepicker({
+            dateFormat: "yy-mm-dd",
+            beforeShow: function(input, inst) {
+                var widget = $(inst).datepicker('widget');
+                widget.css('margin-left', ($(input).outerWidth() - widget.outerWidth()) / 2);
+            }
+        });
+    });
+
+    $(document).ready(function() {
+        var liftList = {{ liftList|safe }};
+        $('.liftInput').typeahead({source: liftList});
+        
+        // Hide all unused/deleted rows in log
+        $("tr.strength").each(function() {
+            var emptyCounter = 0; // Unused rows are completely empty. emptyCounter determines whether a row is empty or not.
+            
+            $(this).find('input').each(function() {
+                if ($(this).attr('type') == 'text') {
+                    if (!$(this).val()) {
+                        emptyCounter += 1;
+                    }
+                }
+                if ($(this).attr('type') == 'checkbox') {
+                    if ($(this).attr('name').indexOf('DELETE') >= 0) {
+                        if ($(this).attr('checked')) {
+                            emptyCounter += 100; // DELETE being checked dominates everything
+                        }
+                    } else {
+                        if (!$(this).attr('checked')) {
+                            emptyCounter += 1;
+                        }
+                    }
+                }
+            });
+            
+            $(this).find('textarea').each(function() {
+                if (!$(this).val()) {
+                    emptyCounter += 1;
+                }
+            });
+            
+            if (emptyCounter >= 6) { // Hard coded based on number of fields in StrengthForm
+                $(this).hide();
+            }
+        });
+    });
+</script>
+{% endblock %}

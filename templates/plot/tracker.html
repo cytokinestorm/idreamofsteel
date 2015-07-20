@@ -1,0 +1,144 @@
+{% extends "plot/plot_template.html" %}
+
+{% block content %}
+
+<div class="row">
+    <div class="span8">
+        <h5 class="titleNoMargin"><b>{{ username }}'s Single-Lift Tracker</b></h5>
+    </div>
+    <div class="span4">
+        {% include "plot/trackerNav.html" %}
+    </div>
+</div>
+
+<div class="row">
+    <div class="span2">
+        <span class="blogByline">
+            <ul class="nav nav-list">
+                {% for iLift in liftList %}
+                    <li{% if iLift.active %} class="active"{% endif %}><a href={% url charts.views.tracker username=username liftId=iLift.id %}>{{ iLift.name }}</a></li>
+                {% endfor %}
+            </ul>
+        </span>
+    </div>
+    <div class="span10">
+        <div id="trackerPlot" style="width: 100%; height: 700px;"></div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scriptStuff %}
+<script type="text/javascript">
+    var chart;
+    $(document).ready(function() {
+        chart = new Highcharts.StockChart({
+            chart : {
+                renderTo : 'trackerPlot',
+                zoomType: 'xy',
+                backgroundColor: 'transparent'
+            },
+
+            rangeSelector : {
+                selected : 1,
+                inputEnabled: false,
+                buttons: [{
+                    type: 'month',
+                    count: 1,
+                    text: '1m'
+                }, {
+                    type: 'month',
+                    count: 3,
+                    text: '3m'
+                }, {
+                    type: 'month',
+                    count: 6,
+                    text: '6m'
+                }, {
+                    type: 'year',
+                    count: 1,
+                    text: '1y'
+                }, {
+                    type: 'all',
+                    text: 'All'
+                }]
+            },
+
+            tooltip : {
+                formatter: function() {
+                    var ptWork = this.points[0];
+                    var ptMax = this.points[1];
+                    
+                    workName = ptWork.point.name;
+                    maxName = ptMax.point.name;
+                    
+                    dateName = new Date(ptWork.point.x).toDateString();
+                    return '<span style="font-size: 90%;">'+dateName+'</span><br />'+
+                            '<span style="font-weight: bold; color: '+ptMax.series.color+' ">Estimated Max:</span>'+maxName+'<br />'+
+                            '<span style="font-weight: bold; color: '+ptWork.series.color+' ">Work Set(s)</span>'+workName;
+                }
+            },
+        
+            title : {
+                text : null
+            },
+            
+            scrollbar : {
+                enabled : false
+            },
+            
+            credits: {
+                enabled: false
+            },
+            
+            xAxis : {
+                ordinal : false
+            },
+            
+            yAxis : {
+                startOnTick : 0
+            },
+            
+            series : [{
+                name : 'Work Set(s)',
+                data : [ {% for iWork in workSetData %} {
+                    name: '{{ iWork.name|safe }}',
+                    x: {{ iWork.x }},
+                    y: {{ iWork.y }},
+                    events: { click: function() { window.location.href = '{{ iWork.link }}'; } }
+                }, {% endfor %}],
+                type : 'areaspline',
+                animation: false,
+                threshold : null,
+                marker: {
+                    enabled: true,
+                    symbol: 'circle'
+                }, 
+                fillColor : {
+                    linearGradient : {
+                        x1: 0, 
+                        y1: 0, 
+                        x2: 0, 
+                        y2: 1
+                    },
+                    stops : [[0, Highcharts.getOptions().colors[0]], [1, 'rgba(0,0,0,0)']]
+                }
+            }, {
+                name : 'Estimated Max',
+                data : [ {% for iMax in estMaxData %} {
+                    name: '{{ iMax.name|safe }}',
+                    x: {{ iMax.x }},
+                    y: {{ iMax.y }},
+                    events: { click: function() { window.location.href = '{{ iMax.link }}'; } }
+                }, {% endfor %}],
+                type : 'spline',
+                animation: false,
+                threshold : null,
+                marker: {
+                    enabled: false
+                }
+            }]
+        });
+    });
+</script>
+{% endblock %}

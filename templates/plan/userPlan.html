@@ -1,0 +1,20 @@
+{% extends "blog/blog_template.html" %}
+
+{% block sectionTitle %}
+    <div class="blogOwnerInfo">
+        <table><tr><td>
+            <h1><a href={% url share.views.blogUser username=thisAccount.username page=1 %}>{{ thisAccount.username }}</a></h1>
+            <h5><a href='/share/feed/rss/user/{{ thisAccount.username }}/'><i class="icon-rss"></i></a></h5>
+        </td></tr></table>
+    </div>
+{% endblock %}
+
+{% block blogSubtitle %}Planned Sessions{% endblock %}
+
+{% block blogPagerBot %}{% include "plan/planPager.html" with pagedSession=pagedSession lastpage=lastpage %}{% endblock %}
+{% block blogPagerTop %}{% include "plan/planPager.html" with pagedSession=pagedSession lastpage=lastpage %}{% endblock %}
+
+{% block blogSidebar %}
+    {% include "blog/sidebar_profileTable.html" %}
+    {% include "blog/sidebar_comments.html" %}
+{% endblock %}

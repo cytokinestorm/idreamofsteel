@@ -1,0 +1,15 @@
+{% extends "blog/blog_template.html" %}
+
+{% block sectionTitle %}
+    <div class="blogOwnerInfo">
+        <table><tr><td>
+            <h1><a href="/">All Public Logs</a></h1>
+            <h5><a href='/share/feed/rss/all/'><i class="icon-rss"></i></a></h5>
+        </td></tr></table>
+    </div>
+{% endblock %}
+
+{% block blogSidebar %}
+    {% include "blog/sidebar_teamList.html" %}
+    {% include "blog/sidebar_comments.html" %}
+{% endblock %}

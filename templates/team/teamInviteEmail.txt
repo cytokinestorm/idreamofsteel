@@ -1,0 +1,9 @@
+Greetings!
+
+{{ inviter }} has sent you an invitation to join {{ teamname }} on I Dream of Steel (http://www.idreamofsteel.com/share/team/view/{{ teamname }}/).
+
+Please log on (http://www.idreamofsteel.com/acconts/login/) to confirm your invitation.
+
+If you do not already have an account, you can also create one form that same page. Note that you must use this email in order to join the team without having to re-confirm membership. You may change your email settings after registering.
+
+(Please pardon the sketchy-looking email.)

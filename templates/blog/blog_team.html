@@ -1,0 +1,20 @@
+{% extends "blog/blog_template.html" %}
+
+{% block sectionTitle %}
+    <div class="blogOwnerInfo">
+        <table><tr>
+            <td class="sectionTeamTitle">
+                <h1><a href={% url share.views.blogTeam teamname=thisTeam.name page=1 %}>{{ thisTeam.pretty_name }}</a></h1>
+                <h5><a href='/share/feed/rss/team/{{ thisTeam.name }}/'><i class="icon-rss"></i></a></h5>
+            </td>
+            <td class="sectionTeamTitle">
+                {{ thisTeam.description }}
+            </td>
+        </tr></table>
+    </div>
+{% endblock %}
+
+{% block blogSidebar %}
+    {% include "blog/sidebar_teamRoster.html" %}
+    {% include "blog/sidebar_comments.html" %}
+{% endblock %}

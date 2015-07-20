@@ -1,0 +1,187 @@
+{% extends "base_template.html" %}
+
+{% block section %}
+
+<div class="row">
+    <div class="span12">
+        {% if request.GET.profileChange %}
+            <div class="alert alert-success"><b>Profile saved.</b></div>
+        {% endif %}
+        {% if request.GET.passChange %}
+            <div class="alert alert-success"><b>New password saved.</b></div>
+        {% endif %}
+        {% if request.GET.newUser %}
+            <div class="alert alert-success"><b>New account created. Please take a minute fill out the (optional) information below.</b></div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row">
+    <div class="span4">
+        <div class="sessionForm">
+            <form action={% url userstats.views.submitProfile %} method="post">{% csrf_token %}
+                <h5 class="titleNoMargin"><b>{{ request.user.username }}'s Profile</b></h5>
+                <div class="row">
+                    <div class="span2">
+                        <span class="blogByline">
+                            <a href={% url share.views.blogUser username=request.user.username page=1 %}>Log</a>
+                            (<a href={% url traininglog.views.importLog %}>Import</a>/<a href={% url traininglog.views.exportLog %}>Export</a>)
+                            | <a href={% url plan.views.planUser username=request.user.username page=1 %}>Plan</a>
+                        </span>
+                    </div>
+                    <div class="span2">
+                        <span class="blogByline float_r">
+                            <a href={% url traininglog.views.liftManager %}>Manage Lifts</a>
+                        </span>
+                    </div>
+                </div>
+
+                <table class="table table-profileView table-bordered">
+                    <thead>
+                        <tr>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="pEditName">{% with thisField=thisAccount.first_name %}{% include "registration/profileField.html" %}{% endwith %}</td>
+                            <td class="pEditName">{% with thisField=thisAccount.last_name %}{% include "registration/profileField.html" %}{% endwith %}</td>
+                        </tr>
+                    </tbody>
+
+                    <thead>
+                        <tr>
+                            <th>Sex</th>
+                            <th>Weight</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{ thisProfile.sex }}</td>
+                            <td class="pEditWeight">{% with thisField=thisProfile.weight %}{% include "registration/profileField.html" %}{% endwith %} {{ unit }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="tabbable">
+                    <ul class="nav nav-tabs noMargin">
+                        <li class="active"><a href="#powerlifting" data-toggle="tab"><b>Powerlifting</b></a></li>
+                        <li><a href="#olympiclifting" data-toggle="tab"><b>Olympic Lifting</b></a></li>
+                    </ul>
+
+                    <div class="tab-content upshift">
+                        <div class="tab-pane active" id="powerlifting">
+                            <table class="table table-profileView table-bordered">
+                                <tbody>
+                                    <tr>
+                                        <th class="pLiftName">Wt. Class</th>
+                                        <td colspan=2>{{ thisProfile.pl_weightclass }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="pLiftName"></th>
+                                        <th>Gym</th>
+                                        <th>Meet</th>
+                                    </tr>
+                                    <tr>
+                                        <th class="pLiftName"><a href={% url charts.views.tracker username=request.user.username liftId=9 %}>Squat</a></th>
+                                        <td class="pEditLift">{% with thisField=thisProfile.squat_gym %}{% include "registration/profileField.html" %}{% endwith %} {{ unit }}</td>
+                                        <td class="pEditLift">{% with thisField=thisProfile.squat_meet %}{% include "registration/profileField.html" %}{% endwith %} {{ unit }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="pLiftName"><a href={% url charts.views.tracker username=request.user.username liftId=12 %}>Bench</a></th>
+                                        <td class="pEditLift">{% with thisField=thisProfile.bench_gym %}{% include "registration/profileField.html" %}{% endwith %} {{ unit }}</td>
+                                        <td class="pEditLift">{% with thisField=thisProfile.bench_meet %}{% include "registration/profileField.html" %}{% endwith %} {{ unit }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="pLiftName"><a href={% url charts.views.tracker username=request.user.username liftId=15 %}>Deadlift</a></th>
+                                        <td class="pEditLift">{% with thisField=thisProfile.dead_gym %}{% include "registration/profileField.html" %}{% endwith %} {{ unit }}</td>
+                                        <td class="pEditLift">{% with thisField=thisProfile.dead_meet %}{% include "registration/profileField.html" %}{% endwith %} {{ unit }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="pLiftName">PL Total</th>
+                                        <td class="pEditLift">{% with thisField=thisProfile.total_gym %}{% include "registration/profileField.html" %}{% endwith %} {{ unit }}</td>
+                                        <td class="pEditLift">{% with thisField=thisProfile.total_meet %}{% include "registration/profileField.html" %}{% endwith %} {{ unit }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="tab-pane" id="olympiclifting">
+                            <table class="table table-profileView table-bordered">
+                                <tbody>
+                                    <tr>
+                                        <th class="pLiftName">Wt. Class</th>
+                                        <td colspan=2>{{ thisProfile.oly_weightclass }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="pLiftName"></th>
+                                        <th>Gym</th>
+                                        <th>Meet</th>
+                                    </tr>
+                                    <tr>
+                                        <th class="pLiftName"><a href={% url charts.views.tracker username=request.user.username liftId=44 %}>Snatch</a></th>
+                                        <td class="pEditLift">{% with thisField=thisProfile.snatch_gym %}{% include "registration/profileField.html" %}{% endwith %} {{ unit }}</td>
+                                        <td class="pEditLift">{% with thisField=thisProfile.snatch_meet %}{% include "registration/profileField.html" %}{% endwith %} {{ unit }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="pLiftName"><a href={% url charts.views.tracker username=request.user.username liftId=43 %}>Clean & Jerk</a></th>
+                                        <td class="pEditLift">{% with thisField=thisProfile.cnj_gym %}{% include "registration/profileField.html" %}{% endwith %} {{ unit }}</td>
+                                        <td class="pEditLift">{% with thisField=thisProfile.cnj_meet %}{% include "registration/profileField.html" %}{% endwith %} {{ unit }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th class="pLiftName">Oly Total</th>
+                                        <td class="pEditLift">{% with thisField=thisProfile.olytotal_gym %}{% include "registration/profileField.html" %}{% endwith %} {{ unit }}</td>
+                                        <td class="pEditLift">{% with thisField=thisProfile.olytotal_meet %}{% include "registration/profileField.html" %}{% endwith %} {{ unit }}</td>
+                                    </tr>
+                                    <tr class="notImportant">
+                                        <th class="pLiftName"><a href={% url charts.views.tracker username=request.user.username liftId=18 %}>Press</a></th>
+                                        <td class="pEditLift">{% with thisField=thisProfile.press_gym %}{% include "registration/profileField.html" %}{% endwith %} {{ unit }}</td>
+                                        <td class="pEditLift">{% with thisField=thisProfile.press_meet %}{% include "registration/profileField.html" %}{% endwith %} {{ unit }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <h5 class="titleNoMargin"><b>Account Settings</b></h5>
+                <a class="blogByline" href="/accounts/password/change/">Change Password</a>
+                
+                <table class="table table-profileView table-bordered">
+                    <thead>
+                        <tr>
+                            <th colspan=2>Email</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan=2 class="pEditEmail">{% with thisField=thisAccount.email %}{% include "registration/profileField.html" %}{% endwith %}</td>
+                        </tr>
+                    </tbody>
+                    <thead>
+                        <tr>
+                            <th><a href="#" class="tooltip-top" title="Private accounts are invisible to the public, though certain statistics may be used in aggregate reports. Public accounts are visible to everyone.">Privacy</a></th>
+                            <th>Units</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>{{ thisProfile.privacy }}</td>
+                            <td>{{ thisProfile.units }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            
+            <button type="submit" name="submitType" class="btn btn-primary btn-small float_l" value="Save and Continue">Save</button>
+            </form>
+        </div>
+    </div>
+    
+    {% include "registration/profileChart.html" %}
+</div>
+
+{% endblock %}
+
+{% block scriptStuff %}
+    {% include "registration/chartProportional.html" %}
+{% endblock %}

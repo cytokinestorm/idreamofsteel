@@ -1,0 +1,39 @@
+{% extends "team/team_template.html" %}
+
+{% block team %}
+
+<form class="sessionForm" action="/share/team/submit/" method="post">{% csrf_token %}
+	<input type="hidden" name="oldName" value="{{ oldName }}" />
+	{% if thisTeamForm.pretty_name.errors %}
+		<div class="alert alert-danger">
+			{% for iError in thisTeamForm.pretty_name.errors %}
+				<b>{{ iError }}</b><br />
+			{% endfor %}
+		</div>
+	{% endif %}
+	<div class="teamnameInput">{{ thisTeamForm.pretty_name }}</div>
+	
+	<br />
+	{% if thisTeamForm.name.errors %}
+		<div class="alert alert-danger">
+			{% for iError in thisTeamForm.name.errors %}
+				<b>{{ iError }}</b><br />
+			{% endfor %}
+		</div>
+	{% endif %}
+	<div class="teampathInput">{{ thisTeamForm.name }}</div>
+	
+	<br />
+	{% if thisTeamForm.description.errors %}
+		<div class="alert alert-danger">
+			{% for iError in thisTeamForm.description.errors %}
+				<b>{{ iError }}</b><br />
+			{% endfor %}
+		</div>
+	{% endif %}
+	<div class="teamdescInput">{{ thisTeamForm.description }}</div>
+	
+	<p><button type="submit" name="teamSubmit" class="btn btn-primary btn-small" value="{{ type }}">Save</button></p>
+</form>
+
+{% endblock %}

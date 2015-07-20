@@ -1,0 +1,138 @@
+{% extends "plot/plot_template.html" %}
+
+{% block content %}
+
+<div class="row">
+    <div class="span8">
+        <h5 class="titleNoMargin"><b>{{ username }}'s Cross-User Progress Comparison</b></h5>
+    </div>
+    <div class="span4">
+        {% include "plot/trackerNav.html" %}
+    </div>
+</div>
+
+<div class="row">
+    <div class="span2">
+        <span class="blogByline">
+            <ul class="nav nav-list">
+                <li class="nav-header">Comp. Lifts</li>
+                {% for iLift in liftList %}
+                    <li{% if iLift.active %} class="active"{% endif %}><a href={% url charts.views.multiUserTracker username=username liftId=iLift.id %}>{{ iLift.name }}</a></li>
+                {% endfor %}
+            </ul>
+        </span>
+    </div>
+    <div class="span10">
+        <div id="trackerPlot" style="width: 100%; height: 700px;"></div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scriptStuff %}
+<script type="text/javascript">
+    var chart;
+    $(document).ready(function() {
+        chart = new Highcharts.StockChart({
+            chart : {
+                renderTo : 'trackerPlot',
+                zoomType: 'xy',
+                backgroundColor: 'transparent'
+            },
+
+            rangeSelector : {
+                selected : 1,
+                inputEnabled: false,
+                buttons: [{
+                    type: 'month',
+                    count: 1,
+                    text: '1m'
+                }, {
+                    type: 'month',
+                    count: 3,
+                    text: '3m'
+                }, {
+                    type: 'month',
+                    count: 6,
+                    text: '6m'
+                }, {
+                    type: 'year',
+                    count: 1,
+                    text: '1y'
+                }, {
+                    type: 'all',
+                    text: 'All'
+                }]
+            },
+
+            tooltip : {
+                formatter: function() {
+                    dateName = new Date(this.x).toDateString();
+                    var s = '<span style="font-size: 90%;">'+dateName+'</span>'
+                    
+                    $.each(this.points, function(i, point) {
+                        s += '<br /><span style="font-weight: bold; color: '+point.series.color+' ">'+point.series.name+':</span>'+point.point.name;
+                    });
+                    return s
+                }
+            },
+        
+            title : {
+                text : null
+            },
+            
+            scrollbar : {
+                enabled : false
+            },
+            
+            legend : {
+                enabled: true,
+                align: 'right',
+                verticalAlign: 'top',
+                borderColor: null,
+                layout: 'vertical'
+            },
+            
+            navigator : {
+                baseSeries: {{ baseSeries }}
+            },
+            
+            credits: {
+                enabled: false
+            },
+            
+            xAxis : {
+                ordinal : false
+            },
+            
+            yAxis : {
+                startOnTick : 0
+            },
+            
+            series : [
+                {% for iUser in liftMaxes %}
+                    {
+                        name : '{{ iUser.name }}',
+                        data : [ {% for iMax in iUser.data %} {
+                            name: '{{ iMax.name }}',
+                            x: {{ iMax.x }},
+                            y: {{ iMax.y }},
+                            events: { click: function() { window.location.href = '{{ iMax.link }}'; } }
+                        }, {% endfor %}],
+                        type : 'spline',
+                        animation: false,
+                        threshold: null,
+                        {% if iUser.isme %}
+                            visible: true,
+                        {% else %}
+                            visible: false,
+                        {% endif %}
+                        marker: {
+                            enabled: false
+                        }
+                    },
+                {% endfor %}]
+        });
+    });
+</script>
+{% endblock %}

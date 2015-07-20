@@ -1,0 +1,6 @@
+<span class="blogByline float_r">
+    <b>Trackers:</b>
+    <a href={% url charts.views.tracker username=username liftId=liftId %}>Single-Lift</a>,
+    <a href={% url charts.views.multiLiftTracker username=username liftId=liftId %}>Multi-Lift</a>,
+    <a href={% url charts.views.multiUserTracker username=username liftId=liftId %}>Cross-User</a>
+</span>

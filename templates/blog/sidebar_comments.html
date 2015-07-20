@@ -1,0 +1,20 @@
+{% if recentComments %}
+    <div class="row">
+        <div class="span4">
+            <div class="sidebarHeader">
+                <h5>Recent Comments</h5>
+            </div>
+
+            {% for iComment in recentComments %}
+            <a href="{{ iComment.link }}" class="sidebarLink">
+                <div class="sidebarComment">
+                    <div class="sidebarContent">{{ iComment.content|linebreaks }}</div>
+                    <div class="sidebarByline">&mdash; {{ iComment.author__username }} in <b>{{ iComment.session__title }}</b></div>
+                </div>
+            </a>
+            <hr class="commentDivider" />
+            {% endfor %}
+
+        </div>
+    </div>
+{% endif %}

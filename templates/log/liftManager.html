@@ -1,0 +1,64 @@
+{% extends "base_template.html" %}
+
+{% block section %}
+
+<div class="row">
+    <div class="span12">
+        <h5 class="titleNoMargin"><b>{{ request.user.username }}'s Lift Manager</b></h5>
+        
+        <h5 class="titleTopMargin">Global Lifts</h5>
+        <table class="table table-condensed liftManager">
+            <thead>
+                <tr>
+                    <th class="liftManager-name">Name</th>
+                    <th class="liftManager-link">Link</th>
+                    <th class="liftManager-ct">Count</th>
+                    <th class="liftManager-del"></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for iLift in globalLiftList %}
+                    <tr>
+                        <td class="liftManager-name">{{ iLift.name }}</td>
+                        <td class="liftManager-link"><a href={% url share.views.blogLift username=request.user.username liftid=iLift.id page=1 %} class="liftManager-link">All {{ iLift.name }} sessions</a></td>
+                        <td class="liftManager-ct">{{ iLift.ct }}</td>
+                        <td class="liftManager-del"></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <h5 class="titleTopMargin">My Lifts</h5>
+        <form action={% url traininglog.views.liftManagerSubmit %} method="post" class="liftManager">{% csrf_token %}
+            <table class = "table table-condensed liftManager">
+                <thead>
+                    <tr>
+                        <th class="liftManager-name">Name<button type="button" class="btn btn-mini addLift" onclick="addMoreLift('#lift-0', 'tr.liftList:last', 'form', '')">Add New Lift</button></th>
+                        <th class="liftManager-link">Link</th>
+                        <th class="liftManager-ct">Count</th>
+                        <th class="liftManager-del">Delete</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{ myLiftForm.management_form }}
+                    {% for iForm, iInfo in myLiftFormAndList %}
+                        {{ iForm.id }}
+                        <tr class="liftList" id="lift-{{ forloop.counter0 }}">
+                            <td class="liftManager-name">{{ iForm.name }}</td>
+                            <td class="liftManager-link"><a href={%  url share.views.blogLift username=request.user.username liftid=iInfo.id page=1 %} class="liftManager-link">All {{ iInfo.name }} sessions</a></td>
+                            <td class="liftManager-ct">{{ iInfo.ct }}</td>
+                            <td class="liftManager-del">{{ iForm.DELETE }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <button type="submit" class="btn btn-primary btn-small float_l liftManager">Save Changes</button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scriptStuff %}
+<script type="text/javascript" src="{{ STATIC_URL }}js/liftManagerFuncs.js?{{ REVISION }}"></script>
+{% endblock %}

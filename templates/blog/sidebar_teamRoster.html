@@ -1,0 +1,38 @@
+<div class="sidebarSection">
+    <div class="row">
+        <div class="span4">
+            <div class="sidebarHeader">
+                <h5>Team Roster</h5>
+                {% if request.user.is_authenticated %}
+                    <span class="sidebarHeaderControls">
+                        <!-- Exact control depends on status. See share.models for explanation of magic integers. -->
+                        {% if status == 0 %}<a href={% url share.views.teamJoin teamname=thisTeam.name %}><button class="btn btn-mini">Request Invite</button></a>{% endif %}
+                        {% if status == 1 %}<a href={% url share.views.teamView teamname=thisTeam.name %} class="tooltip-left" title="Manage Team"><i class="icon-cogs"></i></a>{% endif %}
+                        {% if status == 2 %}<a href={% url share.views.teamManage teamname=thisTeam.name action='demote' username=request.user.username%} class="tooltip-left" title="Leave Team"><i class="icon-signout"></i></a>{% endif %}
+                        {% if status == 3 %}<a href={% url share.views.teamManage teamname=thisTeam.name action='demote' username=request.user.username%}><button class="btn btn-mini btn-danger">Remove Request</button></a>{% endif %}
+                        {% if status == 4 %}<a href={% url share.views.teamJoin teamname=thisTeam.name %}><button class="btn btn-success">Join</button></a>{% endif %}
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="span4">
+            <table class="sidebarListTable"><tbody>
+                {% for iRow in teamRoster %}
+                    <tr>
+                    {% for iMember in iRow %}
+                        <td>
+                            <a href={% url share.views.blogUser username=iMember.username page=1 %}>
+                                {% if iMember.teammembership__type == 1 %}<i class="icon-user-md"></i>{% else %}<i class="icon-user"></i>{% endif %}
+                                {{ iMember.username }}
+                            </a>
+                        </td>
+                    {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody></table>
+        </div>
+    </div>
+</div>

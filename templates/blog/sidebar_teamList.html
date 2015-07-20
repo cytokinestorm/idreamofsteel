@@ -1,0 +1,29 @@
+<div class="sidebarSection">
+    <div class="row">
+        <div class="span4">
+            <div class="sidebarHeader">
+                <h5>Teams</h5>
+                <span class="sidebarHeaderControls">{% if request.user.is_authenticated %}<a href={% url share.views.teamEdit %} class="tooltip-left" title="New Team"><i class="icon-plus"></i></a>{% endif %}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="span4">
+            <table class="sidebarListTable"><tbody>
+                {% for iRow in teamList %}
+                    <tr>
+                    {% for iTeam in iRow %}
+                        <td>
+                            <a href={% url share.views.blogTeam teamname=iTeam.name page=1 %}><i class="icon-group"></i> {{ iTeam.pretty_name }}</a>
+                            {% if iTeam.isInvited %}
+                                <span class="sidebarInvite"><i class="icon-exclamation-sign"></i></span>
+                            {% endif %}
+                        </td>
+                    {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody></table>
+        </div>
+    </div>
+</div>

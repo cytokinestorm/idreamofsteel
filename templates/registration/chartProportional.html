@@ -1,0 +1,122 @@
+<script type="text/javascript">
+    // chart inputs
+    var lift         = {{ chartData.absolute.label|safe }},
+        gym          = {{ chartData.absolute.gym }},
+        meet         = {{ chartData.absolute.meet }},
+        elite        = {{ chartData.absolute.elite }},
+        master       = {{ chartData.absolute.master }},
+        advanced     = {{ chartData.absolute.advanced }},
+        intermediate = {{ chartData.absolute.intermediate }},
+        novice       = {{ chartData.absolute.novice }},
+        wPrecision = 50,
+        maxWeight    = Math.ceil(Math.max.apply(Math, gym.concat(meet, elite, master, advanced, intermediate, novice))/wPrecision)*wPrecision;
+    
+    // chart dimensions and other constants
+    var m = {'top': 0, 'right': 10, 'bottom': 15, 'left': 0}, // canvas margins
+        ax = {'left': 20, 'subChart': 20}, // left axis
+        bar = {'padding': 15, 'spacing': 10, 'height': 40},
+        subChart = {'spacing': 20, 'title': 20, 'height': bar.padding+bar.height+bar.spacing+bar.height+bar.padding+ax.subChart},
+        chartHop = subChart.title + subChart.height + subChart.spacing;
+        canvas = {'width': $("#statusChart").width(), 'height': m.top+lift.length*chartHop-subChart.spacing+m.bottom}, // canvas sizing
+        labelPadding = 5;
+    
+    // dimension functions
+    var gymY = function(d, i) {return m.top+subChart.title+bar.padding+i*chartHop;};
+    var meetY = function(d, i) {return m.top+subChart.title+bar.padding+bar.height+bar.spacing+i*chartHop;};
+    var classY = function(d, i) {return m.top+subChart.title+i*chartHop;};
+    var axY = function(i) {return m.top+subChart.title+bar.padding+bar.height+bar.spacing+bar.height+bar.padding+i*chartHop;};
+    var barWidth = d3.scale.linear()
+                    .domain([0, maxWeight])
+                    .range([0, canvas.width-m.left-ax.left-m.right]);
+    var classHeight = bar.padding+bar.height+bar.spacing+bar.height+bar.padding;
+    
+    // make the bars
+    var chart = d3.select("#statusChart").append("svg")
+                    .attr("width", canvas.width)
+                    .attr("height", canvas.height);
+    
+    var classBarTemplate = function(name, data) {
+        x = chart.selectAll("rect."+name).data(data).enter().append("rect")
+                .attr("class", "classFill")
+                .attr("x", m.left + ax.left)
+                .attr("y", classY)
+                .attr("width", barWidth)
+                .attr("height", classHeight);
+        return x;
+    };
+    var eliteSubBar = classBarTemplate("elite", elite),
+        masterSubBar = classBarTemplate("master", master),
+        advancedSubBar = classBarTemplate("advanced", advanced),
+        intermediateSubBar = classBarTemplate("intermediate", intermediate),
+        noviceSubBar = classBarTemplate("novice", novice);
+    
+    var gymBar = chart.selectAll("rect.gym").data(gym).enter().append("rect")
+                .attr("class", "gymFill")
+                .attr("x", m.left + ax.left)
+                .attr("y", gymY)
+                .attr("height", bar.height)
+                .transition().duration(1000)
+                .attr("width", barWidth);
+    var meetBar = chart.selectAll("rect.meet").data(meet).enter().append("rect")
+                .attr("class", "meetFill")
+                .attr("x", m.left + ax.left)
+                .attr("y", meetY)
+                .attr("height", bar.height)
+                .transition().duration(1000)
+                .attr("width", barWidth);
+    
+    // add axes
+    var xAxis = d3.svg.axis().scale(barWidth).orient("bottom");
+    for (var i = 0; i < lift.length; i++) {
+        chart.append("g").attr("class", "axis").attr("transform", "translate("+(m.left+ax.left)+","+axY(i)+")").call(xAxis);
+        chart.append("line").attr("class", "yAxis").attr("x1", m.left+ax.left).attr("y1", classY(0, i)).attr("x2", m.left+ax.left).attr("y2", classY(0, i)+bar.padding+bar.height+bar.spacing+bar.height+bar.padding);
+    };
+    
+    // add labels
+    for (var i = 0; i < lift.length; i++) {
+        chart.append("text").attr("x", m.left).attr("y", m.top+subChart.title/2+i*chartHop)
+            .text(lift[i])
+            .attr("class", "yAxisLabel");
+        chart.append("text").attr("x", -(m.top+subChart.title+bar.padding+bar.height/2+i*chartHop)).attr("y", m.left+ax.left*.5)
+            .attr("text-anchor", "middle").attr("transform", "rotate(-90)").attr("dy", "0.35em").text("Gym")
+            .attr("class", "yAxisSubLabel");
+        chart.append("text").attr("x", -(m.top+subChart.title+bar.padding+bar.height+bar.spacing+bar.height/2+i*chartHop)).attr("y", m.left+ax.left*.5)
+            .attr("text-anchor", "middle").attr("transform", "rotate(-90)").attr("dy", "0.35em").text("Meet")
+            .attr("class", "yAxisSubLabel");
+    };
+    var barLabel = function(label, yFunc, data) {
+        x = chart.selectAll("text."+label).data(data).enter().append("text")
+            .attr("x", function(d, i) { return m.left+ax.left+barWidth(d)-labelPadding })
+            .attr("y", function(d, i) { return bar.height/2+yFunc(0, i) })
+            .attr("dy", "0.35em") // somehow, this vertically aligns text
+            .attr("text-anchor", "end")
+            .attr("class", function(d, i) { if (d == 0) { return "barNullLabel" } else { return "barLabel" } })
+            .transition().delay(1000).duration(0)
+            .text(String);
+        return x
+    };
+    gymLabel = barLabel("gym", gymY, gym);
+    meetLabel = barLabel("meet", meetY, meet);
+    
+    // create tooltip boxes
+    var tooltip = d3.select("#statusChart").append("text").style("visibility", "hidden"),
+        classTipText = function(className, boundObj) { return "<b>"+className+"</b>: "+Math.round(barWidth.invert(d3.mouse(boundObj)[0]-m.left-ax.left)*10)/10+" {{ unit }}"; },
+        tipX = function() { return (d3.event.pageX+15)+"px" },
+        tipY = function() { return (d3.event.pageY-10)+"px" };
+    var classAddTooltip = function(label, data, tipText) {
+        var x = classBarTemplate(label, data);
+        x.on("mouseover", function() { tooltip.style("visibility", "visible").attr("class", "classTooltip") })
+         .on("mousemove", function() { tooltip.style("top", tipY()).style("left", tipX()).html(classTipText(tipText, this)) })
+         .on("mouseout", function() { tooltip.style("visibility", "hidden") })
+         .attr("class", "noFill");
+        return x
+    };
+    var maxWeightVec = [];
+    for (i = 0; i < lift.length; i++) {maxWeightVec.push(maxWeight)};
+    classAddTooltip("tElite", maxWeightVec, "Elite");
+    classAddTooltip("tMaster", elite, "Master");
+    classAddTooltip("tAdvanced", master, "Advanced");
+    classAddTooltip("tIntermediate", advanced, "Intermediate");
+    classAddTooltip("tNovice", intermediate, "Novice");
+    classAddTooltip("tUntrained", novice, "Untrained");
+</script>

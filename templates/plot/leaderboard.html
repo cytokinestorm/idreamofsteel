@@ -1,0 +1,192 @@
+{% extends "plot/plot_template.html" %}
+
+{% block content %}
+
+<div class="row">
+	<div class="span6">
+		<h5 class="titleNoMargin"><b>{{ sex }}'s Leaderboard: {{ plotType }}</b></h5>
+	</div>
+	<div class="span6">
+		<table class="float_r">
+			<tbody>
+				<tr>
+					<td><b>Men:&nbsp;</b></td>
+					<td><span class="blogByline">
+						<a href={% url charts.views.leaderboard sex="men" lift="total" %}>Total</a> |
+						<a href={% url charts.views.leaderboard sex="men" lift="squat" %}>Squat</a> |
+						<a href={% url charts.views.leaderboard sex="men" lift="bench" %}>Bench Press</a> |
+						<a href={% url charts.views.leaderboard sex="men" lift="deadlift" %}>Deadlift</a>
+					</span></td>
+				</tr>
+				<tr>
+					<td><b>Women:&nbsp;</b></td>
+					<td><span class="blogByline">
+						<a href={% url charts.views.leaderboard sex="women" lift="total" %}>Total</a> |
+						<a href={% url charts.views.leaderboard sex="women" lift="squat" %}>Squat</a> |
+						<a href={% url charts.views.leaderboard sex="women" lift="bench" %}>Bench Press</a> |
+						<a href={% url charts.views.leaderboard sex="women" lift="deadlift" %}>Deadlift</a>
+					</span></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>
+
+<div id="leaderboardChart"></div>
+<span class="blogByline">Classifications are based on the <a href="http://www.rawpowerlifting.com/classifications.htm">Raw Powerlifting standards</a>.</span>
+<br />
+
+{% endblock %}
+
+{% block scriptStuff %}
+<script type="text/javascript">
+    var gymData = {{ gymData|safe }};
+    var meetData = {{ meetData|safe }};
+    var combinedData = gymData.concat(meetData);
+    
+    var elite = {{ elite }},
+        maste = {{ advanced }},
+        advan = {{ intermediate }},
+        inter = {{ novice }},
+        novic = {{ untrained }};
+    
+    // Create canvas
+    var axPadding = 60,
+        rPadding = 10, // Because the right labels get clipped sometimes
+        tPadding = 10, // Just 'cuz
+        width  = $("#leaderboardChart").width(),
+        height = $("#leaderboardChart").height();
+    
+    var chart = d3.select("#leaderboardChart").append("svg")
+                    .attr("class", "chart")
+                    .attr("width", width)
+                    .attr("height", height);
+    
+    // Create scales
+    var x = d3.scale.linear()
+            .domain([{{ minX }}, {{ maxX }}])
+            .range([axPadding, width - rPadding]);
+    
+    var y = d3.scale.linear()
+            .domain([{{ minY }}, {{ maxY }}])
+            .range([height - axPadding, tPadding]);
+    
+    // Draw class areas
+    var classArea = d3.svg.area()
+                    .x(function(d) { return Math.max(axPadding, Math.min(x(d[0]), width - rPadding)) })
+                    .y0(height - axPadding)
+                    .y1(function(d) { return Math.max(tPadding, Math.min(height - axPadding, y(d[1]))) });
+    var classAddTooltip = function(x, label) {
+        x.on("mouseover", function() { tooltip.style("visibility", "visible").attr("class", "classTooltip") })
+         .on("mousemove", function() { tooltip.style("top", tipY()).style("left", tipX()).html(classTipText(label, this)) })
+         .on("mouseout", function() { tooltip.style("visibility", "hidden") });
+        return x
+    };
+    
+    eliteBox = chart.append("rect") // Overall chart box, also for elite
+                .attr("class", "chartBox")
+                .attr("x", axPadding)
+                .attr("y", tPadding)
+                .attr("width", width - axPadding - rPadding)
+                .attr("height", height - axPadding - tPadding);
+    classAddTooltip(eliteBox, "Elite");
+    
+    eliteArea = chart.append("path").datum(elite).attr("d", classArea).attr("class", "classFill");
+    classAddTooltip(eliteArea, "Master");
+    
+    masteArea = chart.append("path").datum(maste).attr("d", classArea).attr("class", "classFill");
+    classAddTooltip(masteArea, "Advanced");
+    
+    advanArea = chart.append("path").datum(advan).attr("d", classArea).attr("class", "classFill");
+    classAddTooltip(advanArea, "Intermediate");
+    
+    interArea = chart.append("path").datum(inter).attr("d", classArea).attr("class", "classFill");
+    classAddTooltip(interArea, "Novice");
+    
+    novicArea = chart.append("path").datum(novic).attr("d", classArea).attr("class", "classFill");
+    classAddTooltip(novicArea, "Untrained");
+    
+    // Draw points
+    chart.selectAll("circle.gym")
+        .data(gymData)
+        .enter()
+        .append("circle")
+        .attr("cx", function(d) { return x(d.x) })
+        .attr("cy", function(d) { return y(d.y) })
+        .attr("r", 5)
+        .attr("class", "gymFill")
+        .on("mouseover", function(d) { 
+                             d3.select(this).attr("r", 6);
+                             tooltip.style("visibility", "visible").html(tooltipText(d, "Gym {{ plotType }}")).attr("class", "userTooltipGym");
+                         })
+        .on("mouseout", function() { 
+                             d3.select(this).attr("r", 5);
+                             tooltip.style("visibility", "hidden");
+                         })
+        .on("mousemove", function(){ tooltip.style("top", tipY()).style("left", tipX()) })
+        .on("click", function(d) { if (d.link) { window.location.href = d.link } });
+    
+    chart.selectAll("circle.meet")
+        .data(meetData)
+        .enter()
+        .append("circle")
+        .attr("cx", function(d) { return x(d.x) })
+        .attr("cy", function(d) { return y(d.y) })
+        .attr("r", 5)
+        .attr("class", "meetFill")
+        .on("mouseover", function(d) { 
+                             d3.select(this).attr("r", 6);
+                             tooltip.style("visibility", "visible").html(tooltipText(d, "Meet {{ plotType }}")).attr("class", "userTooltipMeet");
+                         })
+        .on("mouseout", function() { 
+                             d3.select(this).attr("r", 5);
+                             tooltip.style("visibility", "hidden");
+                         })
+        .on("mousemove", function(){ tooltip.style("top", tipY()).style("left", tipX()) })
+        .on("click", function(d) { if (d.link) { window.location.href = d.link } });
+    
+    // Tooltip formatting
+    var tooltip = d3.select("#leaderboardChart").append("text").style("visibility", "hidden"),
+        classTipText = function(className, boundObj) { return "<b>"+className+"</b> {{ plotType }}<br />"+Math.round(y.invert(d3.mouse(boundObj)[1])*10)/10+" at "+Math.round(x.invert(d3.mouse(boundObj)[0])*10)/10; },
+        tooltipText = function(d, type) { return "<b>"+d.name+"</b> "+type+"<br />"+d.y+" at "+d.x; },
+        tipX = function() { return (d3.event.pageX+15)+"px" },
+        tipY = function() { return (d3.event.pageY-25)+"px" };
+    
+    // Create Axes
+    var xAxis = d3.svg.axis()
+                .scale(x)
+                .orient("bottom"),
+        yAxis = d3.svg.axis()
+                .scale(y)
+                .orient("left");
+    
+    chart.append("g")
+        .attr("class", "axis")
+        .attr("transform", "translate(0,"+(height-axPadding)+")")
+        .call(xAxis);
+    
+    chart.append("g")
+        .attr("class", "axis")
+        .attr("transform", "translate("+axPadding+",0)")
+        .call(yAxis);
+    
+    chart.append("text")
+        .attr("class", "axisLabel")
+        .attr("x", axPadding + (width - axPadding) / 2)
+        .attr("y", height - axPadding + 40)
+        .text("Weight ({{ units }})");
+
+    chart.append("text")
+        .attr("class", "axisLabel")
+        .attr("transform", "rotate(-90)")
+        .attr("x", -(height - axPadding) / 2)
+        .attr("y", axPadding - 50)
+        .text("{{ plotType }} ({{ units }})");
+    
+    // Create Legend
+    chart.append("circle").attr("cx", axPadding + 10).attr("cy", tPadding + 10).attr("r", 5).attr("class", "gymFill");
+    chart.append("text").attr("x", axPadding + 18).attr("y", tPadding + 14).attr("class", "legend").text("Gym {{ plotType }}");
+    chart.append("circle").attr("cx", axPadding + 10).attr("cy", tPadding + 25).attr("r", 5).attr("class", "meetFill");
+    chart.append("text").attr("x", axPadding + 18).attr("y", tPadding + 29).attr("class", "legend").text("Meet {{ plotType }}");
+</script>
+{% endblock %}

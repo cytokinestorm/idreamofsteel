@@ -1,0 +1,28 @@
+{% if liftList %}
+    <div class="sidebarSection">
+        <div class="row">
+            <div class="span4">
+                <div class="sidebarHeader">
+                    <h5><a href="#liftList" data-toggle="collapse">Tracked Lifts</a></h5>
+                    <span class="sidebarHeaderControls">{% if request.user == thisUser %}<a href={% url traininglog.views.liftManager %} class="tooltip-left" title="Manage Lifts"><i class="icon-cogs"></i></a>{% endif %}</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="liftList" class="collapse">
+        <div class="row">
+            <div class="span4">
+                <table class="sidebarListTable"><tbody>
+                    {% for iLift in liftList %}
+                        <tr>
+                            <td>
+                                <a href={% url share.views.blogLift username=thisUser.username liftid=iLift.1 page=1 %}><i class="icon-play"></i>&nbsp;&nbsp;{{ iLift.0 }}</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody></table>
+            </div>
+        </div>
+        </div>
+    </div>
+{% endif %}
