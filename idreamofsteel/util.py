@@ -74,16 +74,18 @@ def getEstMaxTimeseries(userId, liftId, unitId):
     workSetData = []
     prevDate = None
     prevMax = None
+    # Iterate through all dates to calculate a predicted max.
     for iDate in liftDates:
         unixDate = time.mktime(iDate.timetuple()) * 1000 # x-values
         todayLift = [x for x in liftQuery if x['session__session_date'] == iDate]
         
-        tLiftMax = -float('Inf')
-        tMaxWeight = -float('Inf')
+        # Calculate today's max. Consider a session where you lift SxRxW of 3x5x405 and 2x2x455
+        tLiftMax = -float('Inf') # The heaviest weight actually lifted today (455)
+        tMaxWeight = -float('Inf') # The heaviest predicted max from a single SxRxW entry (405/.82 = 494)
         for tLift in todayLift:
             tReps = min(tLift['reps'], len(REPMAX))
             tSets = min(tLift['sets'], len(REPMAX[tReps]))
-            xMax = round(tLift['weight'] / REPMAX[tReps][tSets], 0)
+            xMax = round(tLift['weight'] / REPMAX[tReps][tSets], 0) # FW BUG?: This seems to not get the right row/column entry in the REPMAX table
             if xMax > tMaxWeight:
                 tMaxWeight = xMax
                 iLift = tLift
@@ -91,18 +93,18 @@ def getEstMaxTimeseries(userId, liftId, unitId):
                 tLiftMax = tLift['weight']
         
         tLiftMax, unitLabel = fixUnit(tLiftMax, unitId)
-        iLiftWeight, unitLabel = fixUnit(iLift['weight'], unitId)
+        iLiftWeight, unitLabel = fixUnit(iLift['weight'], unitId) # The weight of the SxRxW entry that was used to calculate your max (405)
         tMaxWeight, unitLabel = fixUnit(tMaxWeight, unitId)
         
-        if prevMax == None and prevDate == None:
+        if prevMax == None and prevDate == None: # Clearly, if this is your first entry, your max is just your max
             iMaxWeight = tMaxWeight
         else:
-            nDays = (iDate - prevDate).days
-            upHl = 7
-            downHl = 21
-            prevWeight = 0.5 ** (nDays / upHl)
+            nDays = (iDate - prevDate).days # Days since the last time a max was calculated for this lift
+            upHl = 7 # Half life of weight multiplier if your currently predicted max is ABOVE your previously predicted max. See ~/helpers/max.decay.xlsx for details
+            downHl = 21 # Half life of weight multiplier if your currently predicted max is BELOW your previously predicted max
+            prevWeight = 0.5 ** (nDays / upHl) # Weight to assign to your previous max
             if tMaxWeight < prevMax: # previous PRs are "sticky," though they can fall given enough time
-                curWeight = 1.25 ** (nDays - downHl)
+                curWeight = 1.25 ** (nDays - downHl) # Weight to use for your current max. Note that if your current max is below your previous max, and your previous max is recent, the more recent number is *penalized* (nDays - downHl is negative)
             else:
                 curWeight = 1
             iMaxWeight = max(tLiftMax, tMaxWeight * (curWeight / (curWeight + prevWeight)) + prevMax * (prevWeight / (curWeight + prevWeight))) # max because you can't be weaker than the weight you just lifted...duh
